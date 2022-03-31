@@ -17,5 +17,16 @@ Route::get('/', function () {
 
 Auth::routes();
 
-// Route::get('/home', 'HomeController@index')->name('home');
-Route::get('/','admincontroller@index');
+//Sebelum Login akan diarahkan ke halaman start
+Route::get('/start','admincontroller@index');
+
+//logout akan diarakan ke halaman login
+Route::get('/logout','admincontroller@logout');
+
+//Setelah berhasil login akan ke halaman stock barang
+Route::get('/home', 'admincontroller@stockBarang')->name('home');
+
+//halaman ini akan hanya dapat diakses setelah login
+Route::group(['middleware'=>['auth']],function () {
+    Route::get('/stock','admincontroller@stockBarang');
+});
