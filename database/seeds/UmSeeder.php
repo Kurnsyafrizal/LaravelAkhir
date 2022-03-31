@@ -14,9 +14,8 @@ class UmSeeder extends Seeder
     public function run()
     {
         DB::table('ums')->insert([
-            [
-                'name'=>'EA',
-                'created_at'=>Carbon::now()],
+            'name'=>'EA',
+            'created_at'=>Carbon::now(),
         ]);
     }
 }

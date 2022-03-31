@@ -14,11 +14,7 @@ class LocationSeeder extends Seeder
     public function run()
     {
         DB::table('master_locations')->insert([
-            [   
-                'location' => 'RSMALL',
-                'loc_site' => 'HIT KUDUS',
-                'create_at' => Carbon::now()
-            ]
+            'location' => 'RSMALL','loc_site' => 'HIT KUDUS','created_at' => Carbon::now(),
         ]);
     }
 }

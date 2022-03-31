@@ -13,7 +13,7 @@ class TransctionSeeder extends Seeder
      */
     public function run()
     {
-        DB::table('transaction')->insert([
+        DB::table('transactions')->insert([
             [
                 'bukti'=>'TAMBAH1',
                 'tgl_transaksi'=>Carbon::now(), 

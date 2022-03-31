@@ -17,14 +17,14 @@ class StockSeeder extends Seeder
             [
                 'location_id'=>1, 
                 'item_id'=>1, 
-                'stored'=>100, 
+                'saldo'=>100, 
                 'transaction_date'=>Carbon::now(),
                 'created_at'=>Carbon::now()
             ],
             [
                 'location_id'=>1, 
                 'item_id'=>2, 
-                'stored'=>80, 
+                'saldo'=>80, 
                 'transaction_date'=>Carbon::now(),
                 'created_at'=>Carbon::now() 
             ],
