@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Stock extends Model
 {
@@ -10,7 +11,7 @@ class Stock extends Model
     use softDeletes;
 
     //mendefinisikan table yang dituju secara jelas
-    protected $table = "stocks";
+    protected $table = "stoks";
 
     //melakukan relationship pada tabel item
     public function item()

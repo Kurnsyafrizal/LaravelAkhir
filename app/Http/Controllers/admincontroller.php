@@ -23,12 +23,18 @@ class admincontroller extends Controller
         return redirect('/login');
     }
 
+    //Menampilkan Halaman Stock, Halaman ini ketika pertama kali Login akan di tampilkan
     public function stockBarang(){
-        return view('stock');
+        $data = Stock::all();
+        $location = MasterLocation::all();
+        $item  =   MasterItem::all();
+    
+        
+        return view('stock',[
+            'data' => $data,
+            'location' => $location,
+            'item' => $item
+        ]);
     }
 
-
-    public function stok(){
-        $dataStock = Stock::all();
-    }
 }
