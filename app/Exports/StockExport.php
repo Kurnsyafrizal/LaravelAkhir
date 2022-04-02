@@ -11,6 +11,7 @@ class StockExport implements FromCollection
     */
     public function collection()
     {
-        //
+        $data = Stock::all();
+        return view('stock_print',['data'=>$data]);
     }
 }
