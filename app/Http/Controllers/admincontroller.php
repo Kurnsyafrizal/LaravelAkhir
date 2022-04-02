@@ -42,7 +42,9 @@ class admincontroller extends Controller
     {
         $loc = MasterLocation::all();
         $item = MasterItem::all();
-        $data = Stock::where([['item_id','like',$request->kode_barang], ['location_id','like',$request->location]])->get();
+        $data = Stock::where([
+            ['item_id','like',$request->kode_barang], 
+            ['location_id','like',$request->location]])->get();
 
         return view('stock',[
             'data'=>$data,
@@ -84,7 +86,7 @@ class admincontroller extends Controller
         ]);
     }
 
-
+    //Menerima Barang
     public function receipt(Request $request){
 
         DB::table('transactions')->insert([
@@ -124,9 +126,6 @@ class admincontroller extends Controller
     }
 
 
-
-
-
     //Halaman Issue
     public function issuePage(){
 
@@ -143,9 +142,7 @@ class admincontroller extends Controller
             $dats = $data->bukti;
             $dats = str_replace("KURANG", "", $dats);
             $count = $dats+1;
-
         }
-
 
         return view('issue',[
             'count'=> $count,
@@ -161,8 +158,6 @@ class admincontroller extends Controller
         $data = Transaction::all();
         $location = MasterLocation::all();
         $item = MasterItem::all();
-
-
         
         //Membuat Object
         $place0 = ['value' => '0', 'label' =>'Tanpa Filter'];
@@ -179,8 +174,6 @@ class admincontroller extends Controller
         //Membuat Array Penammpung
         $filter = array($obj0 ,$obj1, $obj2, $obj3, $obj4);
 
-
-
         return view('transaction',[
             'data' => $data,
             'location' => $location,
@@ -194,18 +187,19 @@ class admincontroller extends Controller
     // Transaction Filter
     public function transactionFilter(Request $request)
     {
-        $data = Transaction::where([['item_id','like',$request->kode_barang], ['location_id','like',$request->location], ['tgl_transaksi','like',$request->date.'%'], ['bukti','like',$request->bukti.'%']])->get();
-        // dd($data);
+        $data = Transaction::where([
+            ['item_id','like',$request->kode_barang], 
+            ['location_id','like',$request->location], 
+            ['tgl_transaksi','like',$request->date.'%'], 
+            ['bukti','like',$request->bukti.'%']])->get();
+        
         $location = MasterLocation::all();
         $item = MasterItem::all();
-        // dd($proof);
+        
         return view('transaction',[
             'data'=>$data,
             'location'=>$location,
             'item'=>$item]);
     }
-
-    
-    
 
 }
