@@ -29,4 +29,16 @@ Route::get('/home', 'admincontroller@stockBarang')->name('home');
 //halaman ini akan hanya dapat diakses setelah login
 Route::group(['middleware'=>['auth']],function () {
     Route::get('/stock','admincontroller@stockBarang');
+    Route::get('/stock/addstock','admincontroller@addStock');
+    Route::get('/stock/issue','admincontroller@issuePage');
+    Route::get('/stock/transaction/{id}','admincontroller@transaction');
+
+    //FILTER
+    Route::post('/stock/filter','admincontroller@stockFilter');
+    Route::post('/transaction/filter', 'admincontroller@transactionfilter');
+
+    //Receipt
+    Route::post('/stock/add','admincontroller@receipt');
+
+
 });

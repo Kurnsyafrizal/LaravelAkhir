@@ -5,7 +5,8 @@
     <div class="container">
         <div class="card card-info mt-3 border-0">
             <div class="card-body">
-                <form action="">
+                <form action="{{ url('/stock/filter') }}" method="POST">
+                    @csrf
                     <div class="form-group">
                         <label for="filter" class=" font-weight-bold ml-4 h4">{{ __("Filter") }}</label>
                     </div>

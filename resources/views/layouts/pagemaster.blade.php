@@ -17,13 +17,16 @@
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
             <div class="collapse navbar-collapse " id="navbarNavAltMarkup">
                 <div class="navbar-nav p-2">
-                    <a class="nav-link nav-item"  aria-pressed="true" href="">{{ __('Stock') }}</a>
+                    <a class="nav-link nav-item"  aria-pressed="true" href="{{ url('/stock') }}">{{ __('Stock') }}</a>
                 </div>
                 <div class="navbar-nav p-2">
-                    <a class="nav-link nav-item"  aria-pressed="true" href="">{{ __('Add Stock') }}</a>
+                    <a class="nav-link nav-item"  aria-pressed="true" href="{{ url('/stock/addstock') }}">{{ __('Add Stock') }}</a>
                 </div>
                 <div class="navbar-nav p-2">
-                    <a class="nav-link nav-item"  aria-pressed="true" href="">{{ __('Transaction History') }}</a>
+                  <a class="nav-link nav-item"  aria-pressed="true" href="{{ url('/stock/issue') }}">{{ __('Issue Stock') }}</a>
+                </div>
+                <div class="navbar-nav p-2">
+                    <a class="nav-link nav-item"  aria-pressed="true" href="{{ url('/stock/transaction/{id}') }}">{{ __('Transaction History') }}</a>
                   </div>
                 <div class="navbar-nav p-2">
                     <a class="nav-link nav-item"  aria-pressed="true" href="{{ url('/logout') }}">{{ __('Logout') }}</a>
