@@ -3,9 +3,15 @@
 
 @section('content')
     <div class="container mt-5 mb-5">
+        @if(session('message'))
+            <div class="alert alert-success">
+                {{ session('message') }}
+            </div>
+        @endif
+        
         <div class="card border-0">
             <h2 class="text-center">{{ __("Add Stock Barang") }}</h2>
-            <form action="{{ url('/stock/{id}/add') }}" method="POST">
+            <form action="{{ url('/stock/add') }}" method="POST">
                 @csrf
                 @method('POST')
                 <div class="form-group mt-2">
@@ -35,6 +41,11 @@
                 <div class="form-group mt-2">
                     <label for="qty" class="ml-4 font-weight-bold text-md h3">{{ __("Quantity") }}</label>
                     <input type="number" class="form-control" id="qty" name="qty">
+                </div>
+
+                <div class="form-group mt-2">
+                    <label for="tgl_masuk" class="ml-4 font-weight-bold text-md h3">{{ __("Tanggal Masuk") }}</label>
+                    <input type="date" class="form-control" id="tgl_masuk" name="tgl_masuk">
                 </div>
 
                 <div class="form-group mt-2">

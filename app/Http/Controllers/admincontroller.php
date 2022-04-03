@@ -27,7 +27,7 @@ class admincontroller extends Controller
 
     //Menampilkan Halaman Stock, Halaman ini ketika pertama kali Login akan di tampilkan
     public function HalamanHome(){
-        return view('HalamanUtama');
+        return view('halamanutama');
     }
 
 
@@ -57,7 +57,7 @@ class admincontroller extends Controller
         $location = MasterLocation::all();
         $item = MasterItem::all();
 
-        return view('stock/{id}',[
+        return view('stock',[
             'data' => $data,
             'location' => $location,
             'item' => $item,
@@ -85,34 +85,37 @@ class admincontroller extends Controller
     // ========================= RECEIPT ========================
     //Menerima Barang
     public function receipt(Request $request){
-        $cekData = DB::table('transactions')->where('item_id', $request->kode_barang)->orderBy('tgl_transaksi', 'DESC')->first();
-        // if(!empty($cekData) && (strtotime(Carbon::now()->format('Y-m-d')) <= Carbon::parse($cekData->tgl_transaksi)->format('Y-m-d'))){
-        //     dd('Data sudah pernah di input');
-        //     return redirect()->back();
-        // }
-
-
         $stock = Stock::where([
+            ['transaction_date','like',(Carbon::parse($request->tgl_masuk)->format('Y-m-d'))],
             ['item_id','like',$request->kode_barang], 
             ['location_id','like',$request->location]])->first();
 
-        if($stock==null || !empty($cekData) && (strtotime(Carbon::now()->format('Y-m-d')) <= Carbon::parse($cekData->tgl_transaksi)->format('Y-m-d')))
+        if($stock == null)
         {
-            Stock::create([
-                [
-                'location_id'=> $request->id, 
-                'item_id'=> $request->kode_barang, 
-                'saldo'=> $request->qty, 
-                'transaction_date'=> Carbon::now(),
-                'created_at'=> Carbon::now()],
-            ]);
+            $stock = Stock::where([
+                ['transaction_date','like',(Carbon::parse($request->tgl_masuk)->format('Y-m-d'))],
+                ['item_id','like',$request->kode_barang], 
+                ['location_id','like',$request->location]])->orderBy('transaction_date','DESC')->first();
+            
+            if($stock == null || (Carbon::parse($request->tgl_masuk)->format('Y-m-d'))){
+                DB::table('stoks')->insert([
+                    [
+                    'location_id'=> $request->location, 
+                    'item_id'=> $request->kode_barang, 
+                    'saldo'=> $request->qty, 
+                    'transaction_date'=> Carbon::parse($request->tgl_masuk)->format('Y-m-d'),
+                    'created_at'=> Carbon::now()],
+                ]);
+            }else{
+                return redirect()->back();
+            }
+            
         }
         else
         {
             $stock->saldo = $stock->saldo+$request->qty;
             $stock->save();
         }
-
         
         DB::table('transactions')->insert([
             [
@@ -127,8 +130,7 @@ class admincontroller extends Controller
             ]
         ]);
 
-        return redirect('/stock');
-
+        return redirect('/stock/detail/{id}')->with("success", "Data Berhasil Ditambahkan");
     }
 
     // ================================= ISSUE PAGE =============================
@@ -146,8 +148,72 @@ class admincontroller extends Controller
         ]);
     }
 
-    public function issue(){
+    public function issue(Request $request){
+        //insialisasi yang ingin kita lakukan temp = menampung request quantity yang ditentukan
+        $temp = $request->qty;
 
+        //mencari data pada table Stock dengan item_id bedasarkan kodebarang atau location berdasarkan location
+        $tempStok = Stock::where([['item_id','like',$request->kode_barang], ['location_id','like',$request->location]])->get();
+
+        //membuat totalan data
+        $sumStok = $tempStok->sum('saldo');
+
+        //ketika Stok barang lebih sedikit dari request stok 
+        if($sumStok<$temp)
+        {
+            $message = "ERROR, Stok Tidak Cukup!!!";
+            return redirect('/stock/issue');
+        }
+        else{
+            //jika request lebih dari 0 maka
+            while($temp>0)
+            {
+                //Mecari data Stock bedasarkan
+                $get_tempStok = Stock::where([['item_id','like',$request->kode_barang], ['location_id','like',$request->location]])->first();
+                
+                //membuat kondisi ketika Stok lebih besar dari request
+                if($get_tempStok->saldo > $temp)
+                {
+                    $get_tempStok->saldo = $get_tempStok->saldo - $temp;
+                    $get_tempStok->save();
+
+
+                    DB::table('transactions')->insert([
+                        [
+                        'bukti'=> 'KURANG'.sprintf("%02d", Transaction::where('program', '=', 'ISSUE')->get()->count() + 1 ),
+                        'tgl_transaksi'=> Carbon::now(), 
+                        'location_id'=> $request->location, 
+                        'item_id'=> $request->kode_barang, 
+                        'qty'=> ($temp*-1), 
+                        'program'=>'ISSUE', 
+                        'user_id'=> Auth::user()->id ,
+                        'created_at'=> Carbon::now()
+                        ]
+                    ]);
+                    $temp=0;
+                }
+                else{
+                    //jika stok lebih kecil dari request maka hapus data
+                    $temp = $temp - $get_tempStok->saldo;
+
+                    DB::table('transactions')->insert([
+                        [
+                        'bukti'=> 'KURANG'.sprintf("%02d", Transaction::where('program', '=', 'ISSUE')->get()->count() + 1 ),
+                        'tgl_transaksi'=> Carbon::now(), 
+                        'location_id'=> $request->location, 
+                        'item_id'=> $request->kode_barang, 
+                        'qty'=> ($get_tempStok->saldo*-1), 
+                        'program'=>'ISSUE', 
+                        'user_id'=> Auth::user()->id ,
+                        'created_at'=> Carbon::now()
+                        ]
+                    ]);
+                    $get_tempStok->delete();
+                }
+
+            }
+        }
+        return redirect('/stock/detail/{id}')->with("success", "Data Berhasil Ditambahkan");
     }
 
 

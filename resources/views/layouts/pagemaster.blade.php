@@ -20,13 +20,13 @@
                 <a class="nav-link nav-item"  aria-pressed="true" href="{{ url('/halamanutama') }}">{{ __('Halaman Utama') }}</a>
               </div>
                 <div class="navbar-nav p-2">
-                    <a class="nav-link nav-item"  aria-pressed="true" href="{{ url('/stock/{id}') }}">{{ __('Stock') }}</a>
+                    <a class="nav-link nav-item"  aria-pressed="true" href="{{ url('/stock/detail/{id}') }}">{{ __('Stock') }}</a>
                 </div>
                 <div class="navbar-nav p-2">
-                    <a class="nav-link nav-item"  aria-pressed="true" href="{{ url('/stock/{id}/addstock') }}">{{ __('Add Stock') }}</a>
+                    <a class="nav-link nav-item"  aria-pressed="true" href="{{ url('/stock/addstock') }}">{{ __('Add Stock') }}</a>
                 </div>
                 <div class="navbar-nav p-2">
-                  <a class="nav-link nav-item"  aria-pressed="true" href="{{ url('/stock/{id}/issue') }}">{{ __('Issue Stock') }}</a>
+                  <a class="nav-link nav-item"  aria-pressed="true" href="{{ url('/stock/issue') }}">{{ __('Issue Stock') }}</a>
                 </div>
                 <div class="navbar-nav p-2">
                     <a class="nav-link nav-item"  aria-pressed="true" href="{{ url('/stock/transaction/{id}') }}">{{ __('Transaction History') }}</a>

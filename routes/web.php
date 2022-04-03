@@ -28,8 +28,8 @@ Route::get('/home', 'admincontroller@stockBarang')->name('home');
 
 //halaman ini akan hanya dapat diakses setelah login
 Route::group(['middleware'=>['auth']],function () {
-    Route::get('/stock','admincontroller@stockBarang');
-    Route::get('/stock/{id}','admincontroller@stockFilter');
+    Route::get('/halamanutama','admincontroller@HalamanHome');
+    Route::get('/stock/detail/{id}','admincontroller@stockFilter');
     Route::get('/stock/transaction/{id}','admincontroller@transaction');
 
 
@@ -38,6 +38,7 @@ Route::group(['middleware'=>['auth']],function () {
 
     //Receipt and Issue
     Route::post('/stock/add','admincontroller@receipt');
+    Route::post('/stock/issue','admincontroller@issue');
 
     //Get Id Item Json
     Route::get('/item/{id}','admincontroller@getItem');

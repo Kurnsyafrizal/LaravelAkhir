@@ -1,11 +1,10 @@
-@extends('layout.pagemaster')
+@extends('layouts.pagemaster')
+@section('title', 'add Page')
 
 @section('content')
 <div class="container">
     <div class="row justify-content-center">
-        <div class="col-md-8">
-            <h2>Starting Page</h2>
-        </div>
+        <h2>Selamat datang</h2>
     </div>
 </div>
 @endsection

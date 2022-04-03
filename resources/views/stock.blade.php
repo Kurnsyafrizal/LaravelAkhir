@@ -5,7 +5,7 @@
     <div class="container">
         <div class="card card-info mt-3 border-0">
             <div class="card-body">
-                <form action="{{ url('/stock', [
+                <form action="{{ url('/stock/detail', [
                     'id' => $id,
                     ]) }}" method="GET">
                     @csrf
@@ -94,7 +94,7 @@
             //ambil value id filter
             var x = document.getElementById("filter").value;
             //memindahkan url sesuai value id yang di pilih
-            window.location.href = "http://127.0.0.1:8000/stock/" + x;
+            window.location.href = "http://127.0.0.1:8000/stock/detail/" + x;
         }
 
     </script>

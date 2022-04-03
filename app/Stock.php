@@ -17,14 +17,14 @@ class Stock extends Model
     public function item()
     {   
          //hasOne atau relation one to one
-         return $this->hasOne(MasterItem::class,'id', 'item_id');
+         return $this->hasOne('App\MasterItem','id', 'item_id');
     }
 
     //melakukan relationship pada tabel location
     public function location()
     {
         //hasOne atau relation one to one
-        return $this->hasOne(MasterLocation::class,'id', 'location_id');
+        return $this->hasOne('App\MasterLocation','id', 'location_id');
     }
 
 }

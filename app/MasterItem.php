@@ -13,6 +13,6 @@ class MasterItem extends Model
     public function um()
     {   
         //hasOne atau relation one to one
-        return $this->hasOne(Um::class,'id', 'um_id');
+        return $this->hasOne('App\Um','id', 'um_id');
     }
 }

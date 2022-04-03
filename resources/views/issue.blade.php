@@ -5,10 +5,12 @@
     <div class="container mt-5 mb-5">
         <div class="card border-0">
             <h2 class="text-center">{{ __("Issue Barang") }}</h2>
-            <form>
-                <div class="form-group mt-2">
-                    <label for="lokasi" class="ml-4 font-weight-bold text-md h3">{{ __("Lokasi") }}</label>
-                    <select class="form-select form-select-lg mb-3" name="lokasi" id="lokasi">
+            <form action="{{ url('/stock/issue') }}" method="POST">
+                @csrf
+                @method("POST")
+                <div class="form-group mt-2"> 
+                    <label for="location" class="ml-4 font-weight-bold text-md h3">{{ __("Lokasi") }}</label>
+                    <select class="form-select form-select-lg mb-3" name="location" id="location">
                         @foreach ($location as $loc)
                             <option value="{{ $loc->id }}">{{ $loc->location }}</option>
                         @endforeach
@@ -32,7 +34,7 @@
 
                 <div class="form-group mt-2">
                     <label for="qty" class="ml-4 font-weight-bold text-md h3">{{ __("Quantity") }}</label>
-                    <input type="number" class="form-control" id="qty">
+                    <input type="number" class="form-control" id="qty" name="qty">
                 </div>
 
                 <div class="form-group mt-2">
@@ -45,7 +47,7 @@
                 </div>
                 
 
-                <button type="submit" class="btn btn-primary mt-4">{{ __("Add Stock") }}</button>
+                <button type="submit" class="btn btn-primary mt-4">{{ __("Add Issue") }}</button>
               </form>
         </div>
     </div>
