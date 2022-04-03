@@ -9,6 +9,10 @@ class Transaction extends Model
     //mendefinisikan table yang dituju secara jelas
     protected $table = "transactions";
 
+    protected $fillable = [
+        'bukti', 'tgl_transaksi','location_id','item_id','qty','program','user_id'
+    ];
+
     //melakukan relationship pada tabel item
     public function item()
     {

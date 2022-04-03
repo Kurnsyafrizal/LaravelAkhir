@@ -6,11 +6,6 @@
         <div class="card border-0">
             <h2 class="text-center">{{ __("Issue Barang") }}</h2>
             <form>
-                <div class="form-group mt-3">
-                    <label for="bukti" class="ml-4 font-weight-bold text-md h3">{{ __("Bukti") }}</label>
-                    <input type="text" class="form-control" readonly id="bukti" value="KURANG{{ $count }}">
-                </div>
-
                 <div class="form-group mt-2">
                     <label for="lokasi" class="ml-4 font-weight-bold text-md h3">{{ __("Lokasi") }}</label>
                     <select class="form-select form-select-lg mb-3" name="lokasi" id="lokasi">
@@ -23,6 +18,7 @@
                 <div class="form-group mt-2">
                     <label for="kode_barang" class="ml-4 font-weight-bold text-md h3">{{ __("Kode Barang") }}</label>
                     <select class="form-select form-select-lg mb-3" name="kode_barang" id="kode_barang">
+                        <option>Pilih</option>
                         @foreach ($item as $items)
                             <option value="{{ $items->id }}">{{ $items->kode_barang }}</option>
                         @endforeach
@@ -55,6 +51,23 @@
     </div>
 
     <script>
-        
+    
+        $(function() 
+        {
+            $('select[name=kode_barang]').change(function() 
+            {
+                var url = '{{ url('/item') }}' +'/'+ $(this).val();
+                console.log(url);
+                
+                //$ = JQUERY
+                $.get(url, function(data) 
+                {
+                    var inputbox = $('form input[name=nama_barang]');
+    
+                    console.log(inputbox);
+                    inputbox.val(data['nama_barang']);
+                });
+            });
+        });
     </script>
 @endsection

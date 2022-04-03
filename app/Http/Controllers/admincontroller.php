@@ -9,7 +9,9 @@ use App\Transaction;
 use App\Um;
 use App\User;
 use Illuminate\Http\Request;
+use DB;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class admincontroller extends Controller
 {
@@ -24,36 +26,45 @@ class admincontroller extends Controller
     }
 
     //Menampilkan Halaman Stock, Halaman ini ketika pertama kali Login akan di tampilkan
-    public function stockBarang(){
-        $data = Stock::all();
+    public function HalamanHome(){
+        return view('HalamanUtama');
+    }
+
+
+    //Filter
+    public function stockfilter($id,Request $request){
+        $data = [];
+        //Membuat Object
+        $place0 = ['value' => '0', 'label' =>'Tanpa Filter'];
+        $obj0 = (object) $place0;
+        $place1 = ['value' => '1', 'label' =>'Kode Barang', 'column' => 'item_id'];
+        $obj1 = (object) $place1;
+        $place2 = ['value' => '2', 'label' =>'Lokasi', 'column' => 'location_id'];
+        $obj2 = (object) $place2;
+
+        //Membuat Array Penammpung
+        $filter = array($obj0 ,$obj1, $obj2);
+
+        if(!empty($request->all()) && $request->get('filter') != 0){
+            $getParamFilter = $request->get('filter');
+            $searchData = $filter[array_search($getParamFilter, array_column($filter, 'value'))];
+            $getParamSearch = $request->get(str_replace(' ', '_', strtolower($searchData->label)));
+            $data = Stock::where($searchData->column, 'LIKE', '%'.$getParamSearch.'%')->get();
+        }else{
+            $data = Stock::all();
+        }
+
         $location = MasterLocation::all();
-        $item  =   MasterItem::all();
-    
-        
-        return view('stock',[
+        $item = MasterItem::all();
+
+        return view('stock/{id}',[
             'data' => $data,
             'location' => $location,
-            'item' => $item
+            'item' => $item,
+            'filter'=> $filter,
+            'id' => $id
         ]);
     }
-
-    // Filter Stock
-    public function stockFilter(Request $request)
-    {
-        $loc = MasterLocation::all();
-        $item = MasterItem::all();
-        $data = Stock::where([
-            ['item_id','like',$request->kode_barang], 
-            ['location_id','like',$request->location]])->get();
-
-        return view('stock',[
-            'data'=>$data,
-            'loc'=>$loc,
-            'item'=>$item
-        ]);
-    }
-
-
 
     //Halaman Add Stock 
     public function addStock(){
@@ -62,70 +73,65 @@ class admincontroller extends Controller
         $location = MasterLocation::all();
         $item  =   MasterItem::all();
 
-        $data = Transaction::where('program','like', 'RECEIPT')->latest('created_at')->first();
-        
-        //mengecek kondisi ketika ada Receipt atau tidak
-        // kalau tidak dia akan mulai dari 1
-        if($data == NULL){
-            $count = 1;
-        }
-        else{
-            //kalau ada dia akan mulai angka selanjutnya
-            $dats = $data->bukti;
-            $dats = str_replace("TAMBAH", "", $dats);
-            $count = $dats+1;
-
-        }
-
 
         return view('addstock',[
-            'count'=> $count,
             'ums' => $ums,
             'location' => $location,
             'item' => $item
         ]);
     }
 
+
+    // ========================= RECEIPT ========================
     //Menerima Barang
     public function receipt(Request $request){
+        $cekData = DB::table('transactions')->where('item_id', $request->kode_barang)->orderBy('tgl_transaksi', 'DESC')->first();
+        // if(!empty($cekData) && (strtotime(Carbon::now()->format('Y-m-d')) <= Carbon::parse($cekData->tgl_transaksi)->format('Y-m-d'))){
+        //     dd('Data sudah pernah di input');
+        //     return redirect()->back();
+        // }
 
-        DB::table('transactions')->insert([
-            [
-                'transaction_date'=>Carbon::now(), 
-                'proof'=>$request->proof,
-                'location_id'=>$request->location, 
-                'item_id'=>$request->part, 
-                'qty'=>$request->qty, 
-                'program'=>'RECEIPT', 
-                'user_id'=>Auth::user()->id ,
-                'created_at'=>Carbon::now()
-            ]
-        ]);
 
-        //CEK DI STOK, KALAU ADA EDIT, KALAU TDK ADA INSERT LALU REDIRECT KE STOCK
-        $now = Carbon::parse(Carbon::now())->format('Y-m-d');
-        $stock = Stock::where([['transaction_date','like',$now."%"], ['item_id','like',$request->part], ['location_id','like',$request->location]])->first();
-        if($stock->id==null)
+        $stock = Stock::where([
+            ['item_id','like',$request->kode_barang], 
+            ['location_id','like',$request->location]])->first();
+
+        if($stock==null || !empty($cekData) && (strtotime(Carbon::now()->format('Y-m-d')) <= Carbon::parse($cekData->tgl_transaksi)->format('Y-m-d')))
         {
-            DB::table('stocks')->insert([
-                ['location_id'=>$request->id, 
-                'item_id'=>$request->part, 
-                'stored'=>$request->qty, 
-                'transaction_date'=>Carbon::now(),
-                'created_at'=>Carbon::now()],
+            Stock::create([
+                [
+                'location_id'=> $request->id, 
+                'item_id'=> $request->kode_barang, 
+                'saldo'=> $request->qty, 
+                'transaction_date'=> Carbon::now(),
+                'created_at'=> Carbon::now()],
             ]);
         }
         else
         {
-            $stock->stored = $stock->stored+$request->qty;
+            $stock->saldo = $stock->saldo+$request->qty;
             $stock->save();
         }
+
+        
+        DB::table('transactions')->insert([
+            [
+            'bukti'=> 'TAMBAH'.sprintf("%02d", Transaction::where('program', '=', 'RECEIPT')->get()->count() + 1 ),
+            'tgl_transaksi'=> Carbon::now(), 
+            'location_id'=> $request->location, 
+            'item_id'=> $request->kode_barang, 
+            'qty'=> $request->qty, 
+            'program'=>'RECEIPT', 
+            'user_id'=> Auth::user()->id ,
+            'created_at'=> Carbon::now()
+            ]
+        ]);
 
         return redirect('/stock');
 
     }
 
-
+    // ================================= ISSUE PAGE =============================
     //Halaman Issue
     public function issuePage(){
 
@@ -133,46 +139,59 @@ class admincontroller extends Controller
         $item       = MasterItem::all();
         $ums        = Um::all();
 
-        $data = Transaction::where('program','like', 'ISSUE')->latest('created_at')->first();
-
-        if($data == NULL){
-            $count = 1;
-        }
-        else{
-            $dats = $data->bukti;
-            $dats = str_replace("KURANG", "", $dats);
-            $count = $dats+1;
-        }
-
         return view('issue',[
-            'count'=> $count,
             'ums' => $ums,
             'location' => $location,
             'item' => $item
         ]);
     }
 
+    public function issue(){
+
+    }
+
+
+    
+    //Get Id Master Item
+    public function getItem($id)
+    {
+        $data = MasterItem::find($id);
+        return $data;
+    }
+
+
+
+    // =============================== TRANSACTION ==============================
+
     //Halaman Transaction
-    public function transaction($id){
-        
-        $data = Transaction::all();
-        $location = MasterLocation::all();
-        $item = MasterItem::all();
-        
+    public function transaction($id, Request $request){
+        $data = [];
         //Membuat Object
         $place0 = ['value' => '0', 'label' =>'Tanpa Filter'];
         $obj0 = (object) $place0;
-        $place1 = ['value' => '1', 'label' =>'bukti'];
+        $place1 = ['value' => '1', 'label' =>'Bukti', 'column' => 'bukti'];
         $obj1 = (object) $place1;
-        $place2 = ['value' => '2', 'label' =>'lokasi'];
+        $place2 = ['value' => '2', 'label' =>'Lokasi', 'column' => 'location_id'];
         $obj2 = (object) $place2;
-        $place3 = ['value' => '3', 'label' =>'kode_barang'];
+        $place3 = ['value' => '3', 'label' =>'Kode Barang', 'column' => 'item_id'];
         $obj3 = (object) $place3;
-        $place4 = ['value' => '4', 'label' =>'Tanggal'];
+        $place4 = ['value' => '4', 'label' =>'Tanggal', 'column' => 'tgl_transaksi'];
         $obj4 = (object) $place4;
 
         //Membuat Array Penammpung
         $filter = array($obj0 ,$obj1, $obj2, $obj3, $obj4);
+
+        if(!empty($request->all()) && $request->get('filter') != 0){
+            $getParamFilter = $request->get('filter');
+            $searchData = $filter[array_search($getParamFilter, array_column($filter, 'value'))];
+            $getParamSearch = $request->get(str_replace(' ', '_', strtolower($searchData->label)));
+            $data = Transaction::where($searchData->column, 'LIKE', '%'.$getParamSearch.'%')->get();
+        }else{
+            $data = Transaction::all();
+        }
+
+        $location = MasterLocation::all();
+        $item = MasterItem::all();
 
         return view('transaction',[
             'data' => $data,
@@ -183,23 +202,5 @@ class admincontroller extends Controller
         ]);
     }
     
-
-    // Transaction Filter
-    public function transactionFilter(Request $request)
-    {
-        $data = Transaction::where([
-            ['item_id','like',$request->kode_barang], 
-            ['location_id','like',$request->location], 
-            ['tgl_transaksi','like',$request->date.'%'], 
-            ['bukti','like',$request->bukti.'%']])->get();
-        
-        $location = MasterLocation::all();
-        $item = MasterItem::all();
-        
-        return view('transaction',[
-            'data'=>$data,
-            'location'=>$location,
-            'item'=>$item]);
-    }
 
 }

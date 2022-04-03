@@ -5,8 +5,8 @@
     <div class="container mb-5">
         <div class="card card-info mt-3 border-0">
             <div class="card-body">
-                <form action="{{ url('/transaction/filter') }}" method="POST">
-                    @csrf
+                <form action="{{ url('/stock/transaction', ['id' => $id,]) }}" method="GET">
+                    {{-- @csrf --}}
 
                     <div class="form-group">
                         <label for="filter" class=" font-weight-bold ml-4 h2">{{ __("Filter") }}</label>
@@ -45,7 +45,7 @@
                             <label for="kode_barang" class="ml-4 font-weight-bold text-md h4">{{ __("Kode Barang") }}</label>
                             <select class="form-select form-select-lg mb-3" name="kode_barang" id="kode_barang">
                                 @foreach ($item as $items)
-                                    <option value="{{ $items->id }} ">{{ $items->kode_barang }}</option>
+                                    <option value="{{ $items->id }}">{{ $items->kode_barang }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -68,8 +68,8 @@
         {{-- Table --}}
         <div class="card card-info card-outline mt-3">
             <div class="card-header bg-secondary">
-                <a href="" class="btn btn-success">{{  __('Export Excel')  }}</a>
-                <a href="" class="btn btn-danger">{{  __('Export PDF')  }}</a>
+                <a href="{{url('/transaction/export/excel', ['params' => base64_encode(json_encode(Request::all()))])}}" class="btn btn-success">{{  __('Export Excel')  }}</a>
+                <a href="{{url('/transaction/export/pdf', ['params' => base64_encode(json_encode(Request::all()))])}}" class="btn btn-danger">{{  __('Export PDF')  }}</a>
             </div>
 
             <div class="card-body ">

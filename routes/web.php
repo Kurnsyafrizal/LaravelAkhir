@@ -29,16 +29,24 @@ Route::get('/home', 'admincontroller@stockBarang')->name('home');
 //halaman ini akan hanya dapat diakses setelah login
 Route::group(['middleware'=>['auth']],function () {
     Route::get('/stock','admincontroller@stockBarang');
-    Route::get('/stock/addstock','admincontroller@addStock');
-    Route::get('/stock/issue','admincontroller@issuePage');
+    Route::get('/stock/{id}','admincontroller@stockFilter');
     Route::get('/stock/transaction/{id}','admincontroller@transaction');
 
-    //FILTER
-    Route::post('/stock/filter','admincontroller@stockFilter');
-    Route::post('/transaction/filter', 'admincontroller@transactionfilter');
 
-    //Receipt
+    Route::get('/stock/addstock','admincontroller@addStock');
+    Route::get('/stock/issue','admincontroller@issuePage');
+
+    //Receipt and Issue
     Route::post('/stock/add','admincontroller@receipt');
 
+    //Get Id Item Json
+    Route::get('/item/{id}','admincontroller@getItem');
 
+    //Export 
+    Route::get('/transaction/export/excel/{params}', 'ExportController@excelExport');
+    Route::get('/transaction/export/pdf/{params}', 'ExportController@exportPDF');
+
+    //Export 
+    Route::get('/stock/export/excel/{params}', 'ExportController@stockexcelExport');
+    Route::get('/stock/export/pdf/{params}', 'ExportController@stockexportPDF');
 });

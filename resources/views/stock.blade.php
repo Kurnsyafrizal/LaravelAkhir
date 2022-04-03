@@ -5,12 +5,23 @@
     <div class="container">
         <div class="card card-info mt-3 border-0">
             <div class="card-body">
-                <form action="{{ url('/stock/filter') }}" method="POST">
+                <form action="{{ url('/stock', [
+                    'id' => $id,
+                    ]) }}" method="GET">
                     @csrf
                     <div class="form-group">
                         <label for="filter" class=" font-weight-bold ml-4 h4">{{ __("Filter") }}</label>
                     </div>
 
+                    <div class="form-group mt-4">
+                        <select class="form-select form-select-lg mb-3" name="filter" id="filter" onchange="myFunction()">
+                            @foreach ($filter as $fil)
+                                <option value="{{ $fil->value }}" {{ ($fil->value === $id) ? "selected" : "" }}>{{ $fil->label }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    @if ($id == 1 )
                     {{--Kode Barang --}}
                     <div class="form-group mt-2">
                         <label for="kode_barang" class="ml-4 font-weight-bold text-md h3">{{ __("Kode Barang") }}</label>
@@ -20,7 +31,7 @@
                             @endforeach
                         </select>
                     </div>
-
+                    @elseif ($id == 2 )
                     {{-- Lokasi --}}
                     <div class="form-group mt-2">
                         <label for="lokasi" class="ml-4 font-weight-bold text-md h3">{{ __("Lokasi") }}</label>
@@ -31,6 +42,7 @@
                         </select>
                     </div>
 
+                    @endif
                     <div class="form-group mt-4">
                         <button type="submit" class="btn btn-primary btn-lg float-right mb-3">{{ __("Cari") }}</button>
                     </div>
@@ -41,8 +53,8 @@
         {{-- Table --}}
         <div class="card card-info card-outline mt-3">
             <div class="card-header bg-secondary">
-                <a href="" class="btn btn-success">{{  __('Export Excel')  }}</a>
-                <a href="" class="btn btn-danger">{{  __('Export PDF')  }}</a>
+                <a href="{{url('/stock/export/excel', ['params' => base64_encode(json_encode(Request::all()))])}}" class="btn btn-success">{{  __('Export Excel')  }}</a>
+                <a href="{{url('/stock/export/pdf', ['params' => base64_encode(json_encode(Request::all()))])}}" class="btn btn-danger">{{  __('Export PDF')  }}</a>
             </div>
 
             <div class="card-body ">
@@ -73,5 +85,17 @@
                 </table>
             </div>
         </div>
-    </div>  
+    </div>
+    
+    
+    <script type ="text/javascript"> 
+        function myFunction() 
+        {   
+            //ambil value id filter
+            var x = document.getElementById("filter").value;
+            //memindahkan url sesuai value id yang di pilih
+            window.location.href = "http://127.0.0.1:8000/stock/" + x;
+        }
+
+    </script>
 @endsection
