@@ -15,7 +15,7 @@ class TransctionSeeder extends Seeder
     {
         DB::table('transactions')->insert([
             [
-                'bukti'=>'TAMBAH1',
+                'bukti'=>'TAMBAH01',
                 'tgl_transaksi'=>Carbon::now(), 
                 'location_id'=>1, 
                 'item_id'=>1, 
@@ -25,7 +25,7 @@ class TransctionSeeder extends Seeder
                 'created_at'=>Carbon::now()
             ],
             [
-                'bukti'=>'TAMBAH2',
+                'bukti'=>'TAMBAH02',
                 'tgl_transaksi'=>Carbon::now(), 
                 'location_id'=>1, 
                 'item_id'=>2, 

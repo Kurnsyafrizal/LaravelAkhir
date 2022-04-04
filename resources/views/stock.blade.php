@@ -15,6 +15,7 @@
 
                     <div class="form-group mt-4">
                         <select class="form-select form-select-lg mb-3" name="filter" id="filter" onchange="myFunction()">
+                            
                             @foreach ($filter as $fil)
                                 <option value="{{ $fil->value }}" {{ ($fil->value === $id) ? "selected" : "" }}>{{ $fil->label }}</option>
                             @endforeach

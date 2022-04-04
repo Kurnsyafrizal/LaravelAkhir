@@ -46,11 +46,20 @@ class admincontroller extends Controller
         $filter = array($obj0 ,$obj1, $obj2);
 
         if(!empty($request->all()) && $request->get('filter') != 0){
+            //ambil request filter inpt user
             $getParamFilter = $request->get('filter');
+
+            //membuat array 1 dimensi 
+            //melakukan search parameter filter dan column Item_id yang memiliki value
             $searchData = $filter[array_search($getParamFilter, array_column($filter, 'value'))];
+
+            //membuat request get dari Search Data dengan label dari array $filter
             $getParamSearch = $request->get(str_replace(' ', '_', strtolower($searchData->label)));
+
+            // melakukan search data column dan getParamSearch
             $data = Stock::where($searchData->column, 'LIKE', '%'.$getParamSearch.'%')->get();
         }else{
+            // menampilkan seluruh data dari Stock
             $data = Stock::all();
         }
 
@@ -67,60 +76,73 @@ class admincontroller extends Controller
     }
 
     //Halaman Add Stock 
-    public function addStock(){
-
+    public function addStock(Request $request){
         $ums = Um::all();
         $location = MasterLocation::all();
         $item  =   MasterItem::all();
 
-
         return view('addstock',[
             'ums' => $ums,
             'location' => $location,
-            'item' => $item
+            'item' => $item,
         ]);
     }
 
 
     // ========================= RECEIPT ========================
-    //Menerima Barang
-    public function receipt(Request $request){
-        $stock = Stock::where([
-            ['transaction_date','like',(Carbon::parse($request->tgl_masuk)->format('Y-m-d'))],
-            ['item_id','like',$request->kode_barang], 
-            ['location_id','like',$request->location]])->first();
 
+    // //Menerima Barang
+    public function receipt(Request $request){
+
+        $tglmasuk = $request->input('tgl_masuk');
+
+        //mencari data dalam model stock
+        $stock = Transaction::where([
+            ['item_id','like',$request->kode_barang],
+            ['location_id','like',$request->location],
+            ['tgl_transaksi','like', Carbon::parse($tglmasuk)]
+            ])->first();
+        
+        // dd($stock);
+        //jika datanya kosong masuk kondisi ini
         if($stock == null)
         {
-            $stock = Stock::where([
-                ['transaction_date','like',(Carbon::parse($request->tgl_masuk)->format('Y-m-d'))],
+            //mencari data berdasarkan item_id dan Location_id namun di urutkan berdasarkan transaction_date
+            $stock = Transaction::where([
                 ['item_id','like',$request->kode_barang], 
-                ['location_id','like',$request->location]])->orderBy('transaction_date','DESC')->first();
+                ['location_id','like',$request->location]])
+            ->orderBy('tgl_transaksi','DESC')->first();
             
-            if($stock == null || (Carbon::parse($request->tgl_masuk)->format('Y-m-d'))){
+
+            // jika data nya kosong dapat melakukan input
+            // atau tgl_masuk lebih besar dari stock transactiondate
+            
+            // masih menjadi kelemahan ketika data stock sudah habis, user dapat menambahkan data dengan tanggal masuk bebas.
+
+            if($stock == NULL || Carbon::parse($stock->tgl_transaksi)->lt(Carbon::parse($tglmasuk)))
+            {
                 DB::table('stoks')->insert([
                     [
                     'location_id'=> $request->location, 
                     'item_id'=> $request->kode_barang, 
                     'saldo'=> $request->qty, 
-                    'transaction_date'=> Carbon::parse($request->tgl_masuk)->format('Y-m-d'),
+                    'transaction_date'=> Carbon::parse($tglmasuk),
                     'created_at'=> Carbon::now()],
                 ]);
             }else{
                 return redirect()->back();
             }
-            
         }
         else
         {
-            $stock->saldo = $stock->saldo+$request->qty;
-            $stock->save();
+            return redirect()->back();
         }
+
         
         DB::table('transactions')->insert([
             [
             'bukti'=> 'TAMBAH'.sprintf("%02d", Transaction::where('program', '=', 'RECEIPT')->get()->count() + 1 ),
-            'tgl_transaksi'=> Carbon::now(), 
+            'tgl_transaksi'=> Carbon::parse($tglmasuk), 
             'location_id'=> $request->location, 
             'item_id'=> $request->kode_barang, 
             'qty'=> $request->qty, 

@@ -13,6 +13,8 @@ class Stock extends Model
     //mendefinisikan table yang dituju secara jelas
     protected $table = "stoks";
 
+    protected $fillable = ['location_id','item_id','saldo','transaction_date'];
+
     //melakukan relationship pada tabel item
     public function item()
     {   

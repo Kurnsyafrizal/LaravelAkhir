@@ -20,7 +20,7 @@
                 <div class="form-group mt-2">
                     <label for="kode_barang" class="ml-4 font-weight-bold text-md h3">{{ __("Kode Barang") }}</label>
                     <select class="form-select form-select-lg mb-3" name="kode_barang" id="kode_barang">
-                        <option>Pilih</option>
+                        <option value="" hidden>Pilih</option>
                         @foreach ($item as $items)
                             <option value="{{ $items->id }}">{{ $items->kode_barang }}</option>
                         @endforeach

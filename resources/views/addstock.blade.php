@@ -26,7 +26,7 @@
                 <div class="form-group mt-2">
                     <label for="kode_barang" class="ml-4 font-weight-bold text-md h3">{{ __("Kode Barang") }}</label>
                     <select class="form-select form-select-lg mb-3" name="kode_barang" id="kode_barang">
-                        <option>Pilih</option>
+                        <option value="" hidden >Pilih</option>
                         @foreach ($item as $items)
                             <option value="{{ $items->id }}">{{ $items->kode_barang }}</option>
                         @endforeach
@@ -45,7 +45,8 @@
 
                 <div class="form-group mt-2">
                     <label for="tgl_masuk" class="ml-4 font-weight-bold text-md h3">{{ __("Tanggal Masuk") }}</label>
-                    <input type="date" class="form-control" id="tgl_masuk" name="tgl_masuk">
+                    <input type="date" class="form-control" id="tgl_masuk" name="tgl_masuk" min={{ date('Y-m-d h:i:s') }}>
+
                 </div>
 
                 <div class="form-group mt-2">
@@ -78,6 +79,10 @@
                 });
             });
         });
+
+
+
+
     </script>
     
 @endsection
