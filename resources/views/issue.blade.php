@@ -8,6 +8,23 @@
             <form action="{{ url('/stock/issue') }}" method="POST">
                 @csrf
                 @method("POST")
+
+                <div class="form-group mt-2">
+                    @if(session('success'))
+                        <div class="alert alert-success">
+                            {{ session('success') }}
+                        </div>
+                    @endif
+                </div>
+
+                <div class="form-group mt-2">
+                    @if(session('error'))
+                        <div class="alert alert-danger">
+                            {{ session('error') }}
+                        </div>
+                    @endif
+                </div>
+
                 <div class="form-group mt-2"> 
                     <label for="location" class="ml-4 font-weight-bold text-md h3">{{ __("Lokasi") }}</label>
                     <select class="form-select form-select-lg mb-3" name="location" id="location">

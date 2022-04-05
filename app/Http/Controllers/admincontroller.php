@@ -97,18 +97,19 @@ class admincontroller extends Controller
         $tglmasuk = $request->input('tgl_masuk');
 
         //mencari data dalam model stock
-        $stock = Transaction::where([
+        $transac = Transaction::where([
             ['item_id','like',$request->kode_barang],
             ['location_id','like',$request->location],
-            ['tgl_transaksi','like', Carbon::parse($tglmasuk)]
+            ['tgl_transaksi','like', Carbon::createFromFormat('Y-m-d',$tglmasuk)->format('Y-m-d')]
             ])->first();
+        
         
         // dd($stock);
         //jika datanya kosong masuk kondisi ini
-        if($stock == null)
+        if($transac == null)
         {
             //mencari data berdasarkan item_id dan Location_id namun di urutkan berdasarkan transaction_date
-            $stock = Transaction::where([
+            $transac = Transaction::where([
                 ['item_id','like',$request->kode_barang], 
                 ['location_id','like',$request->location]])
             ->orderBy('tgl_transaksi','DESC')->first();
@@ -117,32 +118,30 @@ class admincontroller extends Controller
             // jika data nya kosong dapat melakukan input
             // atau tgl_masuk lebih besar dari stock transactiondate
             
-            // masih menjadi kelemahan ketika data stock sudah habis, user dapat menambahkan data dengan tanggal masuk bebas.
-
-            if($stock == NULL || Carbon::parse($stock->tgl_transaksi)->lt(Carbon::parse($tglmasuk)))
+            if($transac == NULL || Carbon::createFromFormat('Y-m-d H:i:s',$transac->tgl_transaksi)->lt(Carbon::createFromFormat('Y-m-d',$tglmasuk)))
             {
                 DB::table('stoks')->insert([
                     [
                     'location_id'=> $request->location, 
                     'item_id'=> $request->kode_barang, 
                     'saldo'=> $request->qty, 
-                    'transaction_date'=> Carbon::parse($tglmasuk),
+                    'transaction_date'=> Carbon::createFromFormat('Y-m-d',$tglmasuk),
                     'created_at'=> Carbon::now()],
                 ]);
             }else{
-                return redirect()->back();
+                return redirect('/stock/addstock')->with("error", "Data yang anda tambahkan gagal, karena tanggal lebih kecil dari transaksi sebelumnya");
             }
         }
         else
         {
-            return redirect()->back();
+            return redirect('/stock/addstock')->with("error", "Data yang anda tambahkan gagal, karena tanggal lebih kecil dari transaksi sebelumnya");
         }
 
         
         DB::table('transactions')->insert([
             [
             'bukti'=> 'TAMBAH'.sprintf("%02d", Transaction::where('program', '=', 'RECEIPT')->get()->count() + 1 ),
-            'tgl_transaksi'=> Carbon::parse($tglmasuk), 
+            'tgl_transaksi'=> Carbon::createFromFormat('Y-m-d',$tglmasuk), 
             'location_id'=> $request->location, 
             'item_id'=> $request->kode_barang, 
             'qty'=> $request->qty, 
@@ -152,7 +151,7 @@ class admincontroller extends Controller
             ]
         ]);
 
-        return redirect('/stock/detail/{id}')->with("success", "Data Berhasil Ditambahkan");
+        return redirect('/stock/addstock')->with("success", "Data Berhasil Ditambahkan");
     }
 
     // ================================= ISSUE PAGE =============================
@@ -183,8 +182,7 @@ class admincontroller extends Controller
         //ketika Stok barang lebih sedikit dari request stok 
         if($sumStok<$temp)
         {
-            $message = "ERROR, Stok Tidak Cukup!!!";
-            return redirect('/stock/issue');
+            return redirect('/stock/issue')->with('error', "Request Data Melebihi Jumlah Stok");
         }
         else{
             //jika request lebih dari 0 maka
@@ -215,7 +213,8 @@ class admincontroller extends Controller
                     $temp=0;
                 }
                 else{
-                    //jika stok lebih kecil dari request maka hapus data
+                    // jika stok lebih kecil dari request maka hapus data 
+                    // dan dilanjutkan ke temp selanjutnya
                     $temp = $temp - $get_tempStok->saldo;
 
                     DB::table('transactions')->insert([
@@ -235,7 +234,7 @@ class admincontroller extends Controller
 
             }
         }
-        return redirect('/stock/detail/{id}')->with("success", "Data Berhasil Ditambahkan");
+        return redirect('/stock/issue')->with("success", "Stock Barang Berhasil Keluar");
     }
 
 
@@ -289,6 +288,4 @@ class admincontroller extends Controller
             'id' => $id
         ]);
     }
-    
-
 }
